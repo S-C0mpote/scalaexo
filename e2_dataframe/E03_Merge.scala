@@ -60,16 +60,6 @@ object E03_Merge {
 
     videosParquet.show()
     videosParquet.printSchema()
-    /**
-      * Faire de meme pour le dataset comments.csv
-      * */
-    val comments = sparkSession.read
-      .option("header", "true")
-      .option("inferSchema", "true")
-      .csv("src/main/resources/comments.csv")
-
-    comments.show()
-    comments.printSchema()
 
     sparkSession.close()
 

@@ -23,6 +23,33 @@ object E01_hello_kafka {
       *   - Afficher la clé et la valeur dans la console (format String), en streamant le topic pageviews
       * */
 
+    val sparkSession = SparkSession.builder
+      .appName("KafkaStreamPageViews")
+      .master("local[1]")
+      .getOrCreate()
+
+    import sparkSession.implicits._
+
+    val kafkaBootstrapServers = "localhost:9092"
+
+    val streamDF = sparkSession
+      .readStream
+      .format("kafka")
+      .option("kafka.bootstrap.servers", kafkaBootstrapServers)
+      .option("subscribe", "pageviews")
+      .option("startingOffsets", "earliest")
+      .load()
+
+    val keyValueDF = streamDF
+      .selectExpr("CAST(key AS STRING) as key", "CAST(value AS STRING) as value")
+
+    val query = keyValueDF.writeStream
+      .outputMode("append")
+      .format("console")
+      .start()
+
+    query.awaitTermination()
+
   }
 
 }
