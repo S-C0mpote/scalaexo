@@ -20,11 +20,28 @@ object E11_SQL {
       .appName("exo-9")
       .getOrCreate()
 
-    val videos = sparkSession.read
+    val videosUS = sparkSession.read
       .option("header", "true")
       .csv("src/main/resources/USvideos.csv")
     import sparkSession.implicits._
 
+    val videos = videosUS
+      .withColumn("comment_total", $"comment_total".cast("int"))
+      .withColumn("likes", $"likes".cast("int"))
+
+    val stddevCommentCount = videos.agg(stddev($"comment_total").alias("stddevCommentTotal"))
+    stddevCommentCount.show()
+
+    val correlationCommentLikes = videos.agg(corr($"comment_total", $"likes").alias("corrCommentLikes"))
+    correlationCommentLikes.show()
+
+    videos.createOrReplaceTempView("videos_view")
+
+    val stddevCommentCountSQL = sparkSession.sql("SELECT stddev(comment_total) as stddevCommentCount FROM videos_view")
+    stddevCommentCountSQL.show()
+
+    val correlationCommentLikesSQL = sparkSession.sql("SELECT corr(comment_total, likes) as corrCommentLikes FROM videos_view")
+    correlationCommentLikesSQL.show()
   }
 
 }

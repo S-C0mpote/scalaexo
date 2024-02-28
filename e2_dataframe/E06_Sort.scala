@@ -20,6 +20,48 @@ object E06_Sort {
       *   - La video qui a le plus grand nombre de dislike
       * */
 
+    val usVideosWithSchema = sparkSession.read
+      .option("header", "true")
+      .option("inferSchema", "true")
+      .csv("src/main/resources/USvideos.csv")
+
+    usVideosWithSchema.printSchema()
+
+    val gbVideos = sparkSession.read
+      .option("header", "true")
+      .option("inferSchema", "true")
+      .csv("src/main/resources/GBvideos.csv")
+
+    val videos = usVideosWithSchema.union(gbVideos)
+
+    val top5MostViewedVideos = videos
+      .orderBy($"views".desc)
+      .select($"title", $"views")
+      .limit(5)
+
+    top5MostViewedVideos.show()
+
+    val top5LeastViewedVideos = videos
+      .orderBy($"views".asc)
+      .select($"title", $"views")
+      .limit(5)
+
+    top5LeastViewedVideos.show()
+
+    val mostLikedVideo = videos
+      .orderBy($"likes".desc)
+      .select($"title", $"likes")
+      .limit(1)
+
+    mostLikedVideo.show()
+
+    val mostDislikedVideo = videos
+      .orderBy($"dislikes".desc)
+      .select($"title", $"dislikes")
+      .limit(1)
+
+    mostDislikedVideo.show()
+
     sparkSession.close()
 
   }

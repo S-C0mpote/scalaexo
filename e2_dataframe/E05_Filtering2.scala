@@ -43,7 +43,7 @@ object E05_Filtering2 {
       $"category_id" === 28 || $"comment_total" === 0
     ).count()
 
-    println(s"Nombre de vidéos avec categoryId 28 ou aucun commentaire: $videosCategory28OrNoComments")
+    println(s"Nombre de vidéos avec category_id 28 ou aucun commentaire: $videosCategory28OrNoComments")
     sparkSession.close()
 
   }

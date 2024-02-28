@@ -46,7 +46,13 @@ object E03_Merge {
       .csv("src/main/resources/GBvideos.csv")
 
     val videos = usVideosWithSchema.union(gbVideos)
-
+    videos.write
+      .option("header", "true")
+      .mode("overwrite")
+      .csv("path_to_save/videos.csv")
+    /**
+     * JAI UNE ERREUR ICI LIEE A HADOOP
+     */
     videos.write.mode("overwrite").parquet("src/main/resources/videos.parquet")
 
 

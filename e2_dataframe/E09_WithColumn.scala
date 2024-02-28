@@ -22,7 +22,26 @@ object E09_WithColumn {
       .getOrCreate()
 
     import sparkSession.implicits._
+    val usVideosWithSchema = sparkSession.read
+      .option("header", "true")
+      .option("inferSchema", "true")
+      .csv("src/main/resources/USvideos.csv")
 
+    usVideosWithSchema.printSchema()
+
+    val gbVideos = sparkSession.read
+      .option("header", "true")
+      .option("inferSchema", "true")
+      .csv("src/main/resources/GBvideos.csv")
+
+    val videos = usVideosWithSchema.union(gbVideos)
+
+    val videosEnhanced = videos
+      .withColumn("popularite", $"likes" - $"dislikes")
+      .withColumn("formattedDate", to_date($"date", "dd.MM"))
+      .withColumn("id", sha1($"video_id"))
+
+    videosEnhanced.show()
     sparkSession.close()
 
   }

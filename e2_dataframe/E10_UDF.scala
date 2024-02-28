@@ -24,6 +24,22 @@ object E10_UDF {
 
     import sparkSession.implicits._
 
+    def countWordsPiped(input: String): Int = if (input != null) input.split("\\|").length else 0
+
+    //Enregistrer la fonction comme UDF
+    val countWordsPipedUDF = udf(countWordsPiped _)
+
+    // Supposons que videosDF est votre DataFrame contenant une colonne `tags`
+    val videosDF = Seq(
+      ("video1", "tag1|tag2|tag3"),
+      ("video2", "tag1|tag2"),
+      ("video3", "tag1|tag2|tag3|tag4")
+    ).toDF("video_id", "tags")
+
+    //Ajouter une nouvelle colonne avec le nombre de tags par vidéo
+    val videosWithTagsCount = videosDF.withColumn("tagsCount", countWordsPipedUDF($"tags"))
+
+    videosWithTagsCount.show()
 
   }
 
