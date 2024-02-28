@@ -3,7 +3,6 @@ package com.fabulouslab.spark.e3_dataset
 
 import org.apache.spark.sql.{SaveMode, SparkSession}
 case class Video( video_id: String, title: String, channel_title : String, category_id : Int, tags: String, views : Int , likes : Long, dislikes :Int, comment_total :Int, thumbnail_link : String, date : String)
-
 object E01_HelloDataSet {
 
   def main(args: Array[String]) {
@@ -23,6 +22,27 @@ object E01_HelloDataSet {
       .getOrCreate()
     import sparkSession.implicits._
 
+
+    val usVideosWithSchema = sparkSession.read
+      .option("header", "true")
+      .option("inferSchema", "true")
+      .csv("src/main/resources/USvideos.csv")
+
+    usVideosWithSchema.printSchema()
+
+    val gbVideos = sparkSession.read
+      .option("header", "true")
+      .option("inferSchema", "true")
+      .csv("src/main/resources/GBvideos.csv")
+
+    val videos = usVideosWithSchema.union(gbVideos)
+
+    val videoRawDS = videos.as[Video]
+
+    val videosPerCategory = videoRawDS.groupByKey(_.category_id)
+      .count()
+
+    videosPerCategory.show()
     sparkSession.close()
 
   }

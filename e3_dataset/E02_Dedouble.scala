@@ -6,6 +6,7 @@ import java.util.Date
 
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 import com.fabulouslab.spark.utils.DateUtils
+
 object E02_Dedouble {
 
   def getLastVideo(v1: Video, v2: Video) : Video= {
@@ -30,10 +31,34 @@ object E02_Dedouble {
       .appName("exo-1")
       .getOrCreate()
     import sparkSession.implicits._
+    object DateUtils {
+      def toDate(dateStr: String): Option[LocalDate] = Some(LocalDate.now()) // Implémentation fictive
+    }
+
+    val usVideosWithSchema = sparkSession.read
+      .option("header", "true")
+      .option("inferSchema", "true")
+      .csv("src/main/resources/USvideos.csv")
+
+    usVideosWithSchema.printSchema()
+
+    val gbVideos = sparkSession.read
+      .option("header", "true")
+      .option("inferSchema", "true")
+      .csv("src/main/resources/GBvideos.csv")
+
+    val videos = usVideosWithSchema.union(gbVideos)
+
+    val videoDS: Dataset[Video] = videos.as[Video]
+
+    val latestVideoDS = videoDS
+      .groupByKey(_.video_id)
+      .reduceGroups((v1, v2) => getLastVideo(v1, v2))
+      .map(_._2)
+    latestVideoDS.show()
 
 
     sparkSession.close()
 
   }
-
 }
